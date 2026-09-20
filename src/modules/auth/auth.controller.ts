@@ -19,10 +19,16 @@ import {
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/interfaces/jwt-payload.interface.js';
 
+@ApiTags('auth')
 @Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -30,6 +36,7 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: '用户注册' })
   async register(@Body() dto: RegisterDto): Promise<UserResponseDto> {
     return this.authService.register(dto);
   }
@@ -37,6 +44,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '用户登录（支持用户名或邮箱）' })
   async login(
     @Body() dto: LoginDto,
     @Ip() ip: string,
@@ -48,6 +56,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '刷新并轮转令牌' })
   async refresh(
     @Body() dto: RefreshTokenDto,
   ): Promise<RefreshTokenResponseDto> {
@@ -56,6 +65,8 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '主动登出' })
   async logout(
     @CurrentUser() user: JwtPayload,
   ): Promise<LogoutResponseDto> {
@@ -64,6 +75,8 @@ export class AuthController {
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '获取当前登录用户信息' })
   async getProfile(
     @CurrentUser() user: JwtPayload,
   ): Promise<UserProfileWithDeviceDto> {
