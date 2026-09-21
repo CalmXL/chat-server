@@ -38,3 +38,22 @@
 | **令牌刷新** | `POST /auth/refresh` | 校验 Refresh Token 与 Redis 会话状态，执行轮转并下发新 Token 对。 |
 | **主动登出** | `POST /auth/logout` | 作废当前设备的会话与 Token（将 JTI 加入 Redis 黑名单，清除 Redis 中的活跃会话记录）。 |
 | **当前信息** | `GET /auth/me` | 基于有效 Access Token 提取当前用户资料与登录设备信息。 |
+
+---
+
+## 4. AI 问答与流式处理术语 (AI Chat & Streaming)
+
+| 术语 (Term) | 英文标识 | 描述与业务规则 |
+| :--- | :--- | :--- |
+| **供应商 (Provider)** | `LlmProvider` | OpenAI 兼容协议（`baseURL + apiKey + model`）接入的模型服务方。接口统一为 `streamChat(req, signal): AsyncIterable<UpstreamChunk>`，API Key 仅存服务端环境变量。 |
+| **模型目录 (Model Catalog)** | `ModelCatalog` | 静态配置（`AI_PROVIDERS_JSON`）中可切换的模型清单，经 `GET /ai/models` 暴露给前端，响应不含 Key。 |
+| **上游块 (Upstream Chunk)** | `UpstreamChunk` | 供应商 SSE 流经归一化后的最小单位：`{delta?, usage?, finishReason?}`。思维链字段不透传。 |
+| **流式管道 (Stream Pipeline)** | `StreamPipeline` | 上游块 → 可注册 transform 链（`pipeline.use(stage)`）→ SSE 事件的服务端加工管道。内置 `accumulate` / `usageExtract` / `sseEncode` 三段，是"自定义流式处理"的扩展点。 |
+| **AI 会话 (Conversation)** | `Conversation` | 用户与模型的一组多轮问答，归属单一用户。可在首次提问时隐式创建，标题取首条内容前 20 字。 |
+| **消息状态 (Message Status)** | `MessageStatus` | assistant 消息生命周期：`streaming`（生成中）→ `done`（完成）/ `partial`（断连截断，保留已生成内容）/ `error`（上游错误，保留部分内容）。 |
+| **部分回答 (Partial Message)** | `PartialMessage` | 客户端断连时已流出部分内容并以 `partial` 状态落库的 assistant 消息，用户重进会话可见。 |
+| **附件 (Attachment)** | `Attachment` | 经 `POST /uploads` 上传的文件（图片 `jpg/png/webp/gif` 或文档 `pdf/txt/md`），落盘 + DB 登记，提问时经 `attachmentIds` 绑定到用户消息。仅上传者本人可读取。 |
+| **提取文本 (Extracted Text)** | `ExtractedText` | 文档附件在上传时同步提取的纯文本，存 `attachments.extractedText`，随首次提问完整注入 prompt，历史轮次截断重放。 |
+| **上下文窗口 (History Window)** | `HistoryWindow` | 组装模型请求时携带的最近 N 条消息（默认 20，`AI_HISTORY_WINDOW` 可配）。窗口内历史图片降级为占位文本，仅当前轮图片内联 base64。 |
+| **并发流护栏 (Concurrent Stream Guard)** | `ConcurrentStreamGuard` | Redis 计数器 `ai:streams:{userId}`（INCR/DECR + 10 分钟安全 TTL），限制单用户同时进行的流式问答数（`AI_MAX_CONCURRENT_STREAMS`，默认 3）。 |
+| **SSE 事件 (SSE Event)** | `SseEvent` | 流式问答的下行事件：`meta`（首帧，关联信息）/ `delta`（增量文本）/ `usage`（token 用量）/ `done`（结束）/ `error`（错误），辅以 15s `: ping` 心跳。 |
