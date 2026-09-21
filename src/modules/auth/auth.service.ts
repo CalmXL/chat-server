@@ -7,7 +7,10 @@ import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { BusinessException } from '../../common/exceptions/business.exception.js';
-import { ErrorCode, ErrorMessages } from '../../common/constants/error-codes.js';
+import {
+  ErrorCode,
+  ErrorMessages,
+} from '../../common/constants/error-codes.js';
 import { DeviceType, UserStatus } from '../../common/enums/index.js';
 import { User } from '../user/entities/user.entity.js';
 
@@ -172,9 +175,7 @@ export class AuthService {
     };
   }
 
-  async refreshToken(
-    dto: RefreshTokenDto,
-  ): Promise<RefreshTokenResponseDto> {
+  async refreshToken(dto: RefreshTokenDto): Promise<RefreshTokenResponseDto> {
     const payload = await this.tokenService.verifyRefreshToken(
       dto.refreshToken,
     );
@@ -218,10 +219,7 @@ export class AuthService {
       session.deviceId !== payload.deviceId
     ) {
       // Clear the active session immediately to protect user account
-      await this.sessionService.deleteSession(
-        payload.sub,
-        payload.deviceType,
-      );
+      await this.sessionService.deleteSession(payload.sub, payload.deviceType);
       throw new BusinessException(
         ErrorCode.TOKEN_REUSE_DETECTED,
         ErrorMessages[ErrorCode.TOKEN_REUSE_DETECTED],
