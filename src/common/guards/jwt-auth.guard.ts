@@ -27,6 +27,11 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    /**
+     * Reflector 专门用来读取通过装饰器 DI 主题到构造函数
+     *
+     * getAllAndOverride: 读取元数据 + 处理优先级。它按照数组顺序查找标记聊天 IS_PUBLIC_KEY 的元数据。
+     */
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
