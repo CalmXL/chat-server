@@ -1,114 +1,113 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Chat Server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+基于 NestJS 的聊天服务端，提供用户认证（注册、登录、令牌刷新与轮转、登出）等 REST API，后续将承载实时聊天能力。
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 技术栈
 
-## Description
+- **框架**：NestJS 12 + TypeScript（ESM）
+- **运行时 / 包管理**：Bun
+- **数据库**：PostgreSQL（TypeORM）
+- **缓存 / 会话**：Redis（ioredis）
+- **认证**：JWT 双令牌（access + refresh），密码哈希使用 argon2
+- **文档**：Swagger（`/api-docs`）
+- **测试**：Vitest（单测 + e2e，测试环境用 pg-mem / ioredis-mock）
+- **质量**：oxlint + Prettier
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 快速开始
 
-## Project setup
+### 前置依赖
+
+- Bun
+- PostgreSQL（默认 `localhost:5432`，数据库 `chat_server`）
+- Redis（默认 `localhost:6379`）
+
+### 配置环境变量
+
+复制模板并按需修改：
 
 ```bash
-$ bun install
+cp .env.example .env
 ```
 
-## Compile and run the project
+`.env` 已被 gitignore，不会提交。可用变量：
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `NODE_ENV` | `development` | 运行环境 |
+| `PORT` | `3000` | HTTP 监听端口 |
+| `DATABASE_HOST` / `DATABASE_PORT` | `localhost` / `5432` | PostgreSQL 地址 |
+| `DATABASE_USERNAME` / `DATABASE_PASSWORD` | `postgres` / `postgres` | 数据库凭据 |
+| `DATABASE_NAME` | `chat_server` | 数据库名 |
+| `DATABASE_SYNCHRONIZE` | `true` | TypeORM 自动建表；生产环境必须设为 `false` |
+| `REDIS_HOST` / `REDIS_PORT` | `localhost` / `6379` | Redis 地址 |
+| `REDIS_PASSWORD` | 空 | Redis 密码 |
+| `REDIS_DB` | `0` | Redis 逻辑库 |
+| `JWT_ACCESS_SECRET` | 内置开发默认值 | access token 密钥，**生产必须更换** |
+| `JWT_ACCESS_EXPIRES_IN` | `15m` | access token 有效期 |
+| `JWT_REFRESH_SECRET` | 内置开发默认值 | refresh token 密钥，**生产必须更换** |
+| `JWT_REFRESH_EXPIRES_IN` | `7d` | refresh token 有效期 |
+
+### 安装与运行
 
 ```bash
-# development
-$ bun run start
+bun install
 
-# watch mode
-$ bun run start:dev
+# 开发（watch）
+bun run start:dev
 
-# production mode
-$ bun run start:prod
+# 生产
+bun run build && bun run start:prod
 ```
 
-## Run tests
+启动后：
+
+- API 根路径：`http://localhost:3000`
+- Swagger 文档：`http://localhost:3000/api-docs`（JSON：`/api-docs-json`）
+
+## API 概览
+
+基础路径 `/api/v1/auth`：
+
+| 方法 | 路径 | 认证 | 说明 |
+| --- | --- | --- | --- |
+| POST | `/register` | 公开 | 用户注册 |
+| POST | `/login` | 公开 | 登录（支持用户名或邮箱），返回双令牌 |
+| POST | `/refresh` | 公开 | 刷新并轮转令牌 |
+| POST | `/logout` | Bearer | 登出（使当前令牌失效） |
+| GET | `/me` | Bearer | 获取当前登录用户信息 |
+
+受保护接口需在请求头携带 `Authorization: Bearer <accessToken>`。
+
+## 测试与质量
 
 ```bash
-# unit tests
-$ bun run test
+# 单元测试
+bun run test
 
-# e2e tests
-$ bun run test:e2e
+# e2e 测试（内置 pg-mem / ioredis-mock，无需真实数据库）
+bun run test:e2e
 
-# test coverage
-$ bun run test:cov
+# 覆盖率
+bun run test:cov
+
+# 代码检查 / 格式化
+bun run lint
+bun run format
 ```
 
-## Deployment
+## 目录结构
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ bun install -g @nestjs/mau
-$ mau deploy
 ```
+src/
+├── config/         # 配置与环境变量校验（zod）
+├── database/       # TypeORM 数据源
+├── redis/          # Redis 连接与会话存储
+├── modules/
+│   ├── auth/       # 认证：注册/登录/刷新/登出、JWT、会话
+│   └── user/       # 用户实体与服务
+└── common/         # 拦截器、过滤器、守卫、装饰器等通用件
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+docs/               # API 规范、领域模型、实现计划、ADR
+desc/               # 设计说明（NestJS 生命周期、数据库、JWT 认证）
+test/               # e2e 测试
+```
