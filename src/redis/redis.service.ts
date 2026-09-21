@@ -73,6 +73,13 @@ export class RedisService implements OnModuleDestroy {
     return this.redisClient.ttl(key);
   }
 
+  async incr(key: string): Promise<number> {
+    return this.redisClient.incr(key);
+  }
+
+  async decr(key: string): Promise<number> {
+    return this.redisClient.decr(key);
+  }
   // === Session & Auth Helpers ===
 
   async getSession(
@@ -125,5 +132,45 @@ export class RedisService implements OnModuleDestroy {
     }
     const key = REDIS_KEYS.getAuthBlacklistKey(jti);
     await this.set(key, reason, Math.ceil(ttlSeconds));
+  }
+
+  // === AI Chat Guardrail Helpers ===
+
+  async checkAndIncrementRateLimit(
+    userId: string,
+    rpmLimit: number,
+  ): Promise<{ allowed: boolean }> {
+    const minute = new Date()
+      .toISOString()
+      .slice(0, 16)
+      .replace(/[-:T]/g, '');
+    const key = REDIS_KEYS.getAiRateLimitKey(userId, minute);
+    const count = await this.redisClient.incr(key);
+    if (count === 1) {
+      await this.redisClient.expire(key, 60);
+    }
+    return { allowed: count <= rpmLimit };
+  }
+
+  async acquireStreamSlot(
+    userId: string,
+    maxStreams: number,
+  ): Promise<{ allowed: boolean }> {
+    const key = REDIS_KEYS.getAiStreamKey(userId);
+    const count = await this.redisClient.incr(key);
+    await this.redisClient.expire(key, 600); // 10 minutes safety TTL
+    if (count > maxStreams) {
+      await this.redisClient.decr(key);
+      return { allowed: false };
+    }
+    return { allowed: true };
+  }
+
+  async releaseStreamSlot(userId: string): Promise<void> {
+    const key = REDIS_KEYS.getAiStreamKey(userId);
+    const count = await this.redisClient.decr(key);
+    if (count < 0) {
+      await this.redisClient.set(key, '0', 'EX', 600);
+    }
   }
 }

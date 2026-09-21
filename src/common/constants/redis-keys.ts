@@ -11,4 +11,12 @@ export const REDIS_KEYS = {
   getAuthBlacklistKey(jti: string): string {
     return `auth:blacklist:${jti}`;
   },
+
+  getAiStreamKey(userId: string): string {
+    return `ai:streams:${userId}`;
+  },
+
+  getAiRateLimitKey(userId: string, minuteWindow: string): string {
+    return `ai:rate:${userId}:${minuteWindow}`;
+  },
 } as const;

@@ -7,6 +7,9 @@ import { DatabaseModule } from './database/database.module.js';
 import { RedisModule } from './redis/redis.module.js';
 import { UserModule } from './modules/user/user.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { AiModule } from './modules/ai/ai.module.js';
+import { ConversationModule } from './modules/conversation/conversation.module.js';
+import { UploadModule } from './modules/upload/upload.module.js';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -22,6 +25,9 @@ import { AppService } from './app.service.js';
     RedisModule,
     UserModule,
     AuthModule,
+    AiModule,
+    ConversationModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
