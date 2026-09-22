@@ -4,9 +4,9 @@
 
 **Blocked by:** 07（附件接入问答）、08（成本护栏）
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] api-spec.md 覆盖 10 个新端点 + SSE 协议节，与实现逐字段一致
-- [ ] openapi.json 由 swagger 重生成且无手工残留差异
-- [ ] implementation-plan.md 状态勾选完成；README 概览更新
-- [ ] 校对 glossary 第 4 节 / domain-model-ai.md 与最终实现的一致性并修正偏差
+- [x] api-spec.md 覆盖 10 个新端点 + SSE 协议节，与实现逐字段一致
+- [x] openapi.json 由 swagger 重生成且无手工残留差异
+- [x] implementation-plan.md 状态勾选完成；README 概览更新
+- [x] 校对 glossary 第 4 节 / domain-model-ai.md 与最终实现的一致性并修正偏差

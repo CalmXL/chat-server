@@ -4,10 +4,10 @@
 
 **Blocked by:** 05（流式问答主干）
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] 组装请求体包含窗口内历史且按时间升序；窗口外历史不出现（e2e 断言发给 Provider 的请求体）
-- [ ] 窗口条数与 system prompt 均 env 可配
-- [ ] 不传 `conversationId` 隐式建会话，标题为 content 前 20 字，`meta` 帧携带新 id
-- [ ] 新消息刷新 `lastMessageAt`，会话列表排序正确
-- [ ] 单元测试覆盖组装规则；e2e 覆盖多轮连续性与隐式创建
+- [x] 组装请求体包含窗口内历史且按时间升序；窗口外历史不出现（e2e 断言发给 Provider 的请求体）
+- [x] 窗口条数与 system prompt 均 env 可配
+- [x] 不传 `conversationId` 隐式建会话，标题为 content 前 20 字，`meta` 帧携带新 id
+- [x] 新消息刷新 `lastMessageAt`，会话列表排序正确
+- [x] 单元测试覆盖组装规则；e2e 覆盖多轮连续性与隐式创建

@@ -4,9 +4,9 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `AI_PROVIDERS_JSON` 经 Zod 校验，缺失/非法时启动 fail-fast 且报错可读
-- [ ] `GET /ai/models`（JWT 保护）返回全部供应商的模型目录，字段仅 `{id, label, provider}`
-- [ ] 任何接口响应与日志中不出现 apiKey
-- [ ] e2e：登录用户拿到目录；未登录 401
+- [x] `AI_PROVIDERS_JSON` 经 Zod 校验，缺失/非法时启动 fail-fast 且报错可读
+- [x] `GET /ai/models`（JWT 保护）返回全部供应商的模型目录，字段仅 `{id, label, provider}`
+- [x] 任何接口响应与日志中不出现 apiKey
+- [x] e2e：登录用户拿到目录；未登录 401

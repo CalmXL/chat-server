@@ -4,8 +4,8 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] 提供路由级声明机制（装饰器 + 元数据），TransformInterceptor 识别并旁路
-- [ ] 未声明路由的包装行为不变，现有拦截器测试全部保持绿色
-- [ ] 单元测试覆盖：声明路由不包装、未声明路由照常包装
+- [x] 提供路由级声明机制（装饰器 + 元数据），TransformInterceptor 识别并旁路
+- [x] 未声明路由的包装行为不变，现有拦截器测试全部保持绿色
+- [x] 单元测试覆盖：声明路由不包装、未声明路由照常包装

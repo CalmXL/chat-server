@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] 两张表按 domain-model-ai.md 第 1 节落地（TypeORM，沿用现有 synchronize 约定）
-- [ ] 五个端点全部可用且统一走 JWT 鉴权与响应信封
-- [ ] 列表按 `lastMessageAt` 降序分页；空标题创建被拒绝或落默认值的规则明确
-- [ ] 跨用户访问/修改/删除均返回 40401
-- [ ] 删除会话后其消息在库中不可查（级联）
-- [ ] e2e 覆盖上述全部路径（消息数据可用测试夹具直接落库）
+- [x] 两张表按 domain-model-ai.md 第 1 节落地（TypeORM，沿用现有 synchronize 约定）
+- [x] 五个端点全部可用且统一走 JWT 鉴权与响应信封
+- [x] 列表按 `lastMessageAt` 降序分页；空标题创建被拒绝或落默认值的规则明确
+- [x] 跨用户访问/修改/删除均返回 40401
+- [x] 删除会话后其消息在库中不可查（级联）
+- [x] e2e 覆盖上述全部路径（消息数据可用测试夹具直接落库）
