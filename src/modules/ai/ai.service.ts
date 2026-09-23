@@ -197,6 +197,7 @@ export class AiService {
             modelId: dto.modelId,
             messages: assembledMessages,
             signal: abortController.signal,
+            sessionId: conversation.id,
           },
           abortController.signal,
         );

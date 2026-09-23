@@ -93,6 +93,8 @@ export interface ProviderConfigInput {
   baseURL: string;
   apiKey?: string;      // 内联覆盖时可直接给明文
   apiKeyEnv?: string;   // 与 apiKey 二选一：引用同名环境变量
+  userAgent?: string;   // 覆盖默认 UA（chat-server/<version>）
+  sessionHeader?: string; // 配置后，ChatRequest.sessionId 作为该请求头发送
   models: { id: string; label: string }[];
 }
 
@@ -101,6 +103,8 @@ export interface ProviderConfig {
   id: string;
   baseURL: string;
   apiKey: string;
+  userAgent?: string;
+  sessionHeader?: string;
   models: { id: string; label: string }[];
 }
 ```
@@ -174,7 +178,7 @@ data: {"messageId":"...","finishReason":"stop"}
 
 | 变量 | 类型 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- |
-| `AI_PROVIDERS_FILE` | string | `./config/ai-providers.json` | 供应商目录文件路径；条目 `{id, baseURL, apiKeyEnv, models:[{id,label}]}` |
+| `AI_PROVIDERS_FILE` | string | `./config/ai-providers.json` | 供应商目录文件路径；条目 `{id, baseURL, apiKeyEnv, userAgent?, sessionHeader?, models:[{id,label}]}` |
 | `AI_PROVIDERS_JSON` | JSON 数组 | （可选，覆盖文件） | 内联覆盖：`[{id, baseURL, apiKey\|apiKeyEnv, models:[{id, label}]}]` |
 | `<provider>_API_KEY` | string | — | 由目录中 `apiKeyEnv` 引用的密钥变量（如 `DEEPSEEK_API_KEY`）；缺失 fail-fast |
 | `AI_MAX_CONCURRENT_STREAMS` | number | `3` | 单用户并发流上限 |

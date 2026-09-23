@@ -23,6 +23,11 @@ export interface ChatRequest {
   modelId: string;
   messages: AssembledMessage[];
   signal: AbortSignal;
+  /**
+   * Stable per-conversation id forwarded upstream (e.g. OpenCode Go's
+   * `x-opencode-session`) for routing and prompt caching.
+   */
+  sessionId?: string;
 }
 
 export interface LlmProvider {

@@ -11,6 +11,14 @@ const catalog = [
     apiKeyEnv: 'DEEPSEEK_API_KEY',
     models: [{ id: 'deepseek-flash', label: 'deepseek-flash' }],
   },
+  {
+    id: 'opencode-go',
+    baseURL: 'https://opencode.ai/zen/go/v1',
+    apiKeyEnv: 'OPENCODE_GO_API_KEY',
+    userAgent: 'chat-server/0.0.1',
+    sessionHeader: 'x-opencode-session',
+    models: [{ id: 'kimi-k3', label: 'Kimi K3' }],
+  },
 ];
 
 describe('resolveAiProviders', () => {
@@ -35,11 +43,16 @@ describe('resolveAiProviders', () => {
     const providers = resolveAiProviders({
       AI_PROVIDERS_FILE: filePath,
       DEEPSEEK_API_KEY: 'sk-from-env',
+      OPENCODE_GO_API_KEY: 'sk-go',
     });
 
-    expect(providers).toHaveLength(1);
-    expect(providers?.[0].id).toBe('deepseek');
+    expect(providers?.map((p) => p.id)).toEqual(['deepseek', 'opencode-go']);
     expect(providers?.[0].apiKey).toBe('sk-from-env');
+    expect(providers?.[1]).toMatchObject({
+      apiKey: 'sk-go',
+      userAgent: 'chat-server/0.0.1',
+      sessionHeader: 'x-opencode-session',
+    });
   });
 
   it('throws when a referenced apiKeyEnv var is missing', () => {

@@ -96,6 +96,8 @@
 ### 2.16 Provider 接口与零 SDK 实现 (D16)
 - 接口：`LlmProvider.streamChat(req, signal): AsyncIterable<UpstreamChunk>`，`UpstreamChunk = {delta?, usage?, finishReason?}` 三出口归一化。
 - 唯一实现 `OpenAiCompatibleProvider`：原生 `fetch` 调 `{baseURL}/chat/completions`（`stream: true`），手写上游 SSE 解析；**不引入 openai SDK**。
+- 客户端标识：所有上游请求带专属 `User-Agent`（`chat-server/<version>`，可由 provider 的 `userAgent` 覆盖），不使用通用 HTTP 库默认 UA。
+- 会话透传：`ChatRequest.sessionId`（取 `conversation.id`）在 provider 配置了 `sessionHeader` 时作为该请求头发送，满足 OpenCode Go 的 `x-opencode-session` 路由/缓存要求（D21）。
 - 思维链（reasoning）字段首版不透传。
 - 测试缝：e2e 以同接口 `FakeProvider` 经 DI 替换，不碰真实网络。
 
@@ -116,6 +118,11 @@
 - 单元测试：StreamPipeline 三段、上下文组装（窗口/图片降级/文档截断）、上传提取。
 - e2e（vitest + pg-mem + ioredis-mock + supertest）：完整 SSE 事件序列、断连转 `partial`、429 护栏、隐式建会话、附件全流程。
 - 不测真实供应商连通性（属运维探针范畴）。
+
+### 2.21 上游客户端标识与会话头 (D21)
+- 背景：OpenCode Go 要求客户端发送专属 `User-Agent`，并在 `x-opencode-session` 头携带稳定的会话 ID，否则返回 `400 MissingSessionID`。
+- 决策：provider 目录新增可选 `userAgent` 与 `sessionHeader`；`OpenAiCompatibleProvider` 始终发送 `User-Agent`（默认 `chat-server/<version>`），当配置了 `sessionHeader` 且请求带 `sessionId` 时附加该头。会话 ID 取 `conversation.id`（会话内稳定）。
+- 通用性：普通 OpenAI 兼容供应商忽略未知请求头，故该机制对 DeepSeek 等无副作用。
 
 ---
 

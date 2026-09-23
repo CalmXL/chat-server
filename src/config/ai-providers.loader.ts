@@ -16,6 +16,14 @@ const aiProviderInputSchema = z
       .string()
       .min(1, 'Provider apiKeyEnv cannot be empty')
       .optional(),
+    userAgent: z
+      .string()
+      .min(1, 'Provider userAgent cannot be empty')
+      .optional(),
+    sessionHeader: z
+      .string()
+      .min(1, 'Provider sessionHeader cannot be empty')
+      .optional(),
     models: z
       .array(aiProviderModelSchema)
       .min(1, 'Provider must define at least one model'),
@@ -29,6 +37,11 @@ export const aiProviderSchema = z.object({
   id: z.string().min(1, 'Provider id cannot be empty'),
   baseURL: z.string().url('Provider baseURL must be a valid URL'),
   apiKey: z.string().min(1, 'Provider apiKey cannot be empty'),
+  userAgent: z.string().min(1, 'Provider userAgent cannot be empty').optional(),
+  sessionHeader: z
+    .string()
+    .min(1, 'Provider sessionHeader cannot be empty')
+    .optional(),
   models: z
     .array(aiProviderModelSchema)
     .min(1, 'Provider must define at least one model'),
@@ -113,6 +126,8 @@ export function resolveAiProviders(
     id: provider.id,
     baseURL: provider.baseURL,
     apiKey: resolveApiKey(provider, env),
+    userAgent: provider.userAgent,
+    sessionHeader: provider.sessionHeader,
     models: provider.models,
   }));
 }

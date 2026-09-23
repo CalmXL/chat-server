@@ -12,6 +12,8 @@ import {
   ErrorMessages,
 } from '../../../common/constants/error-codes.js';
 
+const DEFAULT_USER_AGENT = 'chat-server/0.0.1';
+
 @Injectable()
 export class OpenAiCompatibleProvider implements LlmProvider {
   constructor(private readonly configService: ConfigService) {}
@@ -42,14 +44,20 @@ export class OpenAiCompatibleProvider implements LlmProvider {
 
     const url = `${provider.baseURL.replace(/\/+$/, '')}/chat/completions`;
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${provider.apiKey}`,
+      'User-Agent': provider.userAgent || DEFAULT_USER_AGENT,
+    };
+    if (provider.sessionHeader && req.sessionId) {
+      headers[provider.sessionHeader] = req.sessionId;
+    }
+
     let response: Response;
     try {
       response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${provider.apiKey}`,
-        },
+        headers,
         body: JSON.stringify({
           model: req.modelId,
           messages: req.messages,

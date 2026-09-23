@@ -9,6 +9,8 @@
     "id": "opencode-go",
     "baseURL": "https://opencode.ai/zen/go/v1",
     "apiKeyEnv": "OPENCODE_GO_API_KEY",
+    "userAgent": "chat-server/0.0.1",
+    "sessionHeader": "x-opencode-session",
     "models": [
       { "id": "deepseek-v4-flash", "label": "DeepSeek V4 Flash" },
       {
