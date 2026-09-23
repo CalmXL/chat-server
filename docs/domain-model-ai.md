@@ -90,17 +90,19 @@ export interface ChatRequest {
 // 目录文件 (config/ai-providers.json) 中的条目：密钥以环境变量名间接引用
 export interface ProviderConfigInput {
   id: string;
+  label?: string;       // 供应商展示名，回退为 id
   baseURL: string;
   apiKey?: string;      // 内联覆盖时可直接给明文
   apiKeyEnv?: string;   // 与 apiKey 二选一：引用同名环境变量
   userAgent?: string;   // 覆盖默认 UA（chat-server/<version>）
   sessionHeader?: string; // 配置后，ChatRequest.sessionId 作为该请求头发送
-  models: { id: string; label: string }[];
+  models: { id: string; label: string }[]; // id 全局唯一（跨 provider 校验）
 }
 
 // 运行时解析后的形态（apiKeyEnv 已解析为明文）
 export interface ProviderConfig {
   id: string;
+  label?: string;
   baseURL: string;
   apiKey: string;
   userAgent?: string;
@@ -178,7 +180,7 @@ data: {"messageId":"...","finishReason":"stop"}
 
 | 变量 | 类型 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- |
-| `AI_PROVIDERS_FILE` | string | `./config/ai-providers.json` | 供应商目录文件路径；条目 `{id, baseURL, apiKeyEnv, userAgent?, sessionHeader?, models:[{id,label}]}` |
+| `AI_PROVIDERS_FILE` | string | `./config/ai-providers.json` | 供应商目录文件路径；条目 `{id, label?, baseURL, apiKeyEnv, userAgent?, sessionHeader?, models:[{id,label}]}`，model id 跨 provider 唯一 |
 | `AI_PROVIDERS_JSON` | JSON 数组 | （可选，覆盖文件） | 内联覆盖：`[{id, baseURL, apiKey\|apiKeyEnv, models:[{id, label}]}]` |
 | `<provider>_API_KEY` | string | — | 由目录中 `apiKeyEnv` 引用的密钥变量（如 `DEEPSEEK_API_KEY`）；缺失 fail-fast |
 | `AI_MAX_CONCURRENT_STREAMS` | number | `3` | 单用户并发流上限 |
@@ -202,7 +204,7 @@ data: {"messageId":"...","finishReason":"stop"}
 | `POST /uploads` | JWT | multipart 多文件上传 → `{attachmentIds[]}` |
 | `GET /uploads/:id` | JWT | 附件元数据（仅属主） |
 | `GET /uploads/:id/download` | JWT | 文件本体流式下载（仅属主，不包信封） |
-| `GET /ai/models` | JWT | 模型目录 `{id, label, provider}[]` |
+| `GET /ai/models` | JWT | 模型目录 `{id, label, provider, providerLabel}[]` |
 | `POST /ai/chat` | JWT | SSE 流式问答，body `{conversationId?, modelId, content, attachmentIds?}` |
 
 ---

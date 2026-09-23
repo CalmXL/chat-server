@@ -10,6 +10,7 @@ describe('AiService (Model Catalog)', () => {
   const mockProviders: AiProviderConfig[] = [
     {
       id: 'openai',
+      label: 'OpenAI',
       baseURL: 'https://api.openai.com/v1',
       apiKey: 'sk-secret-key-1',
       models: [
@@ -41,9 +42,24 @@ describe('AiService (Model Catalog)', () => {
   it('should return model catalog without api keys', () => {
     const models = aiService.getModels();
     expect(models).toEqual([
-      { id: 'gpt-4o', label: 'GPT-4o', provider: 'openai' },
-      { id: 'gpt-4o-mini', label: 'GPT-4o Mini', provider: 'openai' },
-      { id: 'deepseek-chat', label: 'DeepSeek Chat', provider: 'deepseek' },
+      {
+        id: 'gpt-4o',
+        label: 'GPT-4o',
+        provider: 'openai',
+        providerLabel: 'OpenAI',
+      },
+      {
+        id: 'gpt-4o-mini',
+        label: 'GPT-4o Mini',
+        provider: 'openai',
+        providerLabel: 'OpenAI',
+      },
+      {
+        id: 'deepseek-chat',
+        label: 'DeepSeek Chat',
+        provider: 'deepseek',
+        providerLabel: 'deepseek',
+      },
     ]);
 
     for (const model of models) {

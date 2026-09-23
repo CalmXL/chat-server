@@ -78,7 +78,8 @@
 - `AI_PROVIDERS_JSON`（单变量 JSON 数组，`{id, baseURL, apiKey|apiKeyEnv, models[]}`）保留为**内联覆盖**入口，优先级高于 `AI_PROVIDERS_FILE`（用于测试 / CI）。
 - 两种来源均经同一 Zod schema 校验 fail-fast。
 - 护栏阈值独立数值变量带默认值：`AI_MAX_CONCURRENT_STREAMS=3`、`AI_RATE_LIMIT_RPM=20`、`AI_MAX_UPLOAD_MB=10`、`AI_HISTORY_WINDOW=20`、`AI_DOC_TRUNCATE_CHARS=2000`。
-- `GET /ai/models`（JWT 保护）向前端暴露模型目录 `{id, label, provider}[]`，响应绝不包含 Key。
+- `GET /ai/models`（JWT 保护）向前端暴露模型目录 `{id, label, provider, providerLabel}[]`，响应绝不包含 Key。`provider`/`providerLabel` 用于区分不同来源的同名模型（如「DeepSeek 官方」与「OpenCode Go」）。
+- 模型 `id` 在整份目录内**全局唯一**（加载时校验，冲突 fail-fast）：它是客户端唯一提交键、也是 `messages.modelId` 的落库值，碰撞会导致路由歧义。
 
 ### 2.13 REST API 面与隐式建会话 (D13)
 - `POST /conversations`、`GET /conversations`（分页，按最近活跃）、`GET /conversations/:id/messages`、`PATCH /conversations/:id`、`DELETE /conversations/:id`（级联消息+附件+磁盘文件）。

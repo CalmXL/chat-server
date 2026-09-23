@@ -10,6 +10,7 @@ export const aiProviderModelSchema = z.object({
 const aiProviderInputSchema = z
   .object({
     id: z.string().min(1, 'Provider id cannot be empty'),
+    label: z.string().min(1, 'Provider label cannot be empty').optional(),
     baseURL: z.string().url('Provider baseURL must be a valid URL'),
     apiKey: z.string().min(1, 'Provider apiKey cannot be empty').optional(),
     apiKeyEnv: z
@@ -35,6 +36,7 @@ const aiProviderInputSchema = z
 
 export const aiProviderSchema = z.object({
   id: z.string().min(1, 'Provider id cannot be empty'),
+  label: z.string().min(1, 'Provider label cannot be empty').optional(),
   baseURL: z.string().url('Provider baseURL must be a valid URL'),
   apiKey: z.string().min(1, 'Provider apiKey cannot be empty'),
   userAgent: z.string().min(1, 'Provider userAgent cannot be empty').optional(),
@@ -73,6 +75,28 @@ function readProvidersFile(filePath: string): unknown {
     );
   }
   return parseJson(raw, `AI providers file "${filePath}"`);
+}
+
+/**
+ * Model ids are the only key clients send and the only key persisted on
+ * messages, so they must be globally unique across providers. A collision
+ * would make routing (first provider wins) silently ambiguous.
+ */
+function assertUniqueModelIds(
+  providers: z.infer<typeof aiProviderInputSchema>[],
+): void {
+  const seen = new Map<string, string>();
+  for (const provider of providers) {
+    for (const model of provider.models) {
+      const owner = seen.get(model.id);
+      if (owner) {
+        throw new Error(
+          `Duplicate model id "${model.id}" declared by providers "${owner}" and "${provider.id}". Model ids must be globally unique. Fail-fast startup.`,
+        );
+      }
+      seen.set(model.id, provider.id);
+    }
+  }
 }
 
 function resolveApiKey(
@@ -122,8 +146,11 @@ export function resolveAiProviders(
     );
   }
 
+  assertUniqueModelIds(parsed.data);
+
   return parsed.data.map((provider) => ({
     id: provider.id,
+    label: provider.label,
     baseURL: provider.baseURL,
     apiKey: resolveApiKey(provider, env),
     userAgent: provider.userAgent,

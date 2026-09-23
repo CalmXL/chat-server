@@ -7,12 +7,14 @@ import { resolveAiProviders } from './ai-providers.loader.js';
 const catalog = [
   {
     id: 'deepseek',
+    label: 'DeepSeek 官方',
     baseURL: 'https://api.deepseek.com/v1',
     apiKeyEnv: 'DEEPSEEK_API_KEY',
     models: [{ id: 'deepseek-flash', label: 'deepseek-flash' }],
   },
   {
     id: 'opencode-go',
+    label: 'OpenCode Go',
     baseURL: 'https://opencode.ai/zen/go/v1',
     apiKeyEnv: 'OPENCODE_GO_API_KEY',
     userAgent: 'chat-server/0.0.1',
@@ -47,12 +49,37 @@ describe('resolveAiProviders', () => {
     });
 
     expect(providers?.map((p) => p.id)).toEqual(['deepseek', 'opencode-go']);
-    expect(providers?.[0].apiKey).toBe('sk-from-env');
+    expect(providers?.[0]).toMatchObject({
+      apiKey: 'sk-from-env',
+      label: 'DeepSeek 官方',
+    });
     expect(providers?.[1]).toMatchObject({
       apiKey: 'sk-go',
+      label: 'OpenCode Go',
       userAgent: 'chat-server/0.0.1',
       sessionHeader: 'x-opencode-session',
     });
+  });
+
+  it('rejects model ids that collide across providers', () => {
+    expect(() =>
+      resolveAiProviders({
+        AI_PROVIDERS_JSON: JSON.stringify([
+          {
+            id: 'a',
+            baseURL: 'https://api.openai.com/v1',
+            apiKey: 'sk-a',
+            models: [{ id: 'shared-model', label: 'Shared' }],
+          },
+          {
+            id: 'b',
+            baseURL: 'https://api.openai.com/v1',
+            apiKey: 'sk-b',
+            models: [{ id: 'shared-model', label: 'Shared' }],
+          },
+        ]),
+      }),
+    ).toThrow(/Duplicate model id "shared-model"/);
   });
 
   it('throws when a referenced apiKeyEnv var is missing', () => {

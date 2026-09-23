@@ -47,6 +47,7 @@ export class AiService {
           id: model.id,
           label: model.label,
           provider: provider.id,
+          providerLabel: provider.label ?? provider.id,
         });
       }
     }

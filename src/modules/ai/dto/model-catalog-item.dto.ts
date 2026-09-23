@@ -9,4 +9,10 @@ export class ModelCatalogItemDto {
 
   @ApiProperty({ description: '模型归属供应商标识', example: 'deepseek' })
   provider!: string;
+
+  @ApiProperty({
+    description: '模型归属供应商展示名称（未配置时回退为标识）',
+    example: 'DeepSeek 官方',
+  })
+  providerLabel!: string;
 }

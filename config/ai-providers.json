@@ -1,12 +1,14 @@
 [
   {
     "id": "deepseek",
+    "label": "DeepSeek 官方",
     "baseURL": "https://api.deepseek.com/v1",
     "apiKeyEnv": "DEEPSEEK_API_KEY",
     "models": [{ "id": "deepseek-flash", "label": "deepseek-flash" }]
   },
   {
     "id": "opencode-go",
+    "label": "OpenCode Go",
     "baseURL": "https://opencode.ai/zen/go/v1",
     "apiKeyEnv": "OPENCODE_GO_API_KEY",
     "userAgent": "chat-server/0.0.1",
