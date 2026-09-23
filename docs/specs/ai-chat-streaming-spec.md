@@ -61,7 +61,7 @@
 - **API 契约**：`POST/GET/PATCH/DELETE /conversations[...]`、`POST /uploads`、`GET /uploads/:id[/download]`、`GET /ai/models`、`POST /ai/chat`（SSE）。`POST /ai/chat` body `{conversationId?, modelId, content, attachmentIds?}`，不传 `conversationId` 时隐式建会话（标题取 content 前 20 字）。
 - **护栏（全部 env 可配，Zod 校验 fail-fast）**：并发流 `ai:streams:{userId}` INCR/DECR + 10 分钟安全 TTL（默认上限 3）；频率固定窗口 `ai:rate:{userId}:{minute}` INCR + 60s TTL（默认 20 rpm）；上传大小（默认 10MB）；上下文窗口（默认 20 条）；文档截断（默认 2000 字符）。护栏判定在响应头发送之前，拒绝走标准错误信封。
 - **错误码双轨制**：新增 `40401/40402/40010/40011/40012/41301/42901/42902/50201` 九个错误码；响应头未发 → 标准信封 + HTTP 状态；响应头已发 → SSE `error` 事件 + 消息转 `error`。
-- **配置**：供应商列表走 `AI_PROVIDERS_JSON` 单变量 JSON 数组；`GET /ai/models` 暴露目录且响应绝不含 Key。
+- **配置**：供应商目录走受版本管理的 `config/ai-providers.json`（`AI_PROVIDERS_FILE`），条目用 `apiKeyEnv` 间接引用密钥变量；`AI_PROVIDERS_JSON` 保留为内联覆盖入口。`GET /ai/models` 暴露目录且响应绝不含 Key。
 
 ## Testing Decisions
 

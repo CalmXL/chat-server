@@ -155,6 +155,7 @@ describe('Authentication & Session Management E2E', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
+          ignoreEnvFile: true,
           load: [configuration],
           validate: validateEnv,
         }),

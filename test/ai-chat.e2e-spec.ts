@@ -357,6 +357,7 @@ describe('AI Chat & Streaming End-to-End Test Suite', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
+          ignoreEnvFile: true,
           load: [
             () => ({
               ...configuration(),

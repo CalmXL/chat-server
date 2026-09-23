@@ -2,6 +2,7 @@
 
 - **状态 (Status)**: 已接受 (Accepted)
 - **日期 (Date)**: 2026-09-21
+- **修订 (Amended)**: 2026-09-22 — D2/D12 的供应商配置由内联 `AI_PROVIDERS_JSON` 迁移为受版本管理的 `config/ai-providers.json`（`AI_PROVIDERS_FILE`）+ `apiKeyEnv` 密钥间接引用；`AI_PROVIDERS_JSON` 降级为内联覆盖入口。
 - **决策者 (Deciders)**: 架构团队 / 用户
 
 ---
@@ -22,8 +23,8 @@
 
 ### 2.2 OpenAI 兼容的供应商抽象 (D2)
 - 所有模型供应商统一走 **OpenAI 兼容协议**（`baseURL + apiKey + model` 三元组），覆盖 OpenAI / DeepSeek / 通义 / 豆包等国内主流厂商。
-- 模型目录为**静态配置**（`configuration.ts` + 环境变量，Zod 校验 fail-fast，沿用 ADR-0003 约定）。
-- API Key 仅存在于**服务端**环境变量，不下发、不支持用户自带 Key（BYOK 列为后续增强）。
+- 模型目录为**静态配置**（`config/ai-providers.json` + 环境变量，Zod 校验 fail-fast，沿用 ADR-0003 约定）。
+- API Key 仅存在于**服务端**环境变量（目录里只写 `apiKeyEnv` 变量名），不下发、不支持用户自带 Key（BYOK 列为后续增强）。
 
 ### 2.3 SSE 流式传输 (D3)
 - 采用 **SSE**（`POST` + `text/event-stream`）作为流式协议，使用原生 Express `Response` 手写事件流，不使用 `@Sse()` 装饰器（避免 Observable 绑定限制自定义处理）。
@@ -72,7 +73,10 @@
 - 孤儿附件（上传后未被引用）清理机制首版不做。
 
 ### 2.12 配置 Schema (D12)
-- 供应商列表：`AI_PROVIDERS_JSON` 单变量 JSON 数组（`{id, baseURL, apiKey, models[]}`），Zod 校验 fail-fast。
+- 供应商目录：默认从受版本管理的 `config/ai-providers.json` 加载，路径由 `AI_PROVIDERS_FILE` 指定（默认 `./config/ai-providers.json`）。每条为 `{id, baseURL, apiKeyEnv, models[]}`。
+- 密钥解耦：目录中写 `apiKeyEnv: "DEEPSEEK_API_KEY"` 引用同名环境变量，明文密钥只留在 `.env`（不入库、不提交）；被引用变量缺失时 fail-fast。
+- `AI_PROVIDERS_JSON`（单变量 JSON 数组，`{id, baseURL, apiKey|apiKeyEnv, models[]}`）保留为**内联覆盖**入口，优先级高于 `AI_PROVIDERS_FILE`（用于测试 / CI）。
+- 两种来源均经同一 Zod schema 校验 fail-fast。
 - 护栏阈值独立数值变量带默认值：`AI_MAX_CONCURRENT_STREAMS=3`、`AI_RATE_LIMIT_RPM=20`、`AI_MAX_UPLOAD_MB=10`、`AI_HISTORY_WINDOW=20`、`AI_DOC_TRUNCATE_CHARS=2000`。
 - `GET /ai/models`（JWT 保护）向前端暴露模型目录 `{id, label, provider}[]`，响应绝不包含 Key。
 

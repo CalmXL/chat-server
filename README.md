@@ -48,7 +48,9 @@ cp .env.example .env
 | `JWT_ACCESS_EXPIRES_IN` | `15m` | access token 有效期 |
 | `JWT_REFRESH_SECRET` | 内置开发默认值 | refresh token 密钥，**生产必须更换** |
 | `JWT_REFRESH_EXPIRES_IN` | `7d` | refresh token 有效期 |
-| `AI_PROVIDERS_JSON` | - | OpenAI 兼容供应商列表 JSON（含 id, baseURL, apiKey, models） |
+| `AI_PROVIDERS_FILE` | `./config/ai-providers.json` | 供应商目录文件（含 id, baseURL, apiKeyEnv, models），受版本管理 |
+| `AI_PROVIDERS_JSON` | - | 内联覆盖的供应商列表 JSON（优先级高于文件，供测试/CI 用） |
+| `<provider>_API_KEY` | - | 目录中 `apiKeyEnv` 引用的密钥变量（如 `DEEPSEEK_API_KEY`） |
 | `AI_MAX_CONCURRENT_STREAMS`| `3` | 单用户并发流上限 |
 | `AI_RATE_LIMIT_RPM` | `20` | 单用户每分钟提问上限 |
 | `AI_MAX_UPLOAD_MB` | `10` | 附件上传单文件最大限制 (MB) |

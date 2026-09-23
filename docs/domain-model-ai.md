@@ -87,6 +87,16 @@ export interface ChatRequest {
   signal: AbortSignal;
 }
 
+// 目录文件 (config/ai-providers.json) 中的条目：密钥以环境变量名间接引用
+export interface ProviderConfigInput {
+  id: string;
+  baseURL: string;
+  apiKey?: string;      // 内联覆盖时可直接给明文
+  apiKeyEnv?: string;   // 与 apiKey 二选一：引用同名环境变量
+  models: { id: string; label: string }[];
+}
+
+// 运行时解析后的形态（apiKeyEnv 已解析为明文）
 export interface ProviderConfig {
   id: string;
   baseURL: string;
@@ -164,7 +174,9 @@ data: {"messageId":"...","finishReason":"stop"}
 
 | 变量 | 类型 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- |
-| `AI_PROVIDERS_JSON` | JSON 数组 | （必填，缺失 fail-fast） | `[{id, baseURL, apiKey, models:[{id, label}]}]` |
+| `AI_PROVIDERS_FILE` | string | `./config/ai-providers.json` | 供应商目录文件路径；条目 `{id, baseURL, apiKeyEnv, models:[{id,label}]}` |
+| `AI_PROVIDERS_JSON` | JSON 数组 | （可选，覆盖文件） | 内联覆盖：`[{id, baseURL, apiKey\|apiKeyEnv, models:[{id, label}]}]` |
+| `<provider>_API_KEY` | string | — | 由目录中 `apiKeyEnv` 引用的密钥变量（如 `DEEPSEEK_API_KEY`）；缺失 fail-fast |
 | `AI_MAX_CONCURRENT_STREAMS` | number | `3` | 单用户并发流上限 |
 | `AI_RATE_LIMIT_RPM` | number | `20` | 单用户每分钟请求上限 |
 | `AI_MAX_UPLOAD_MB` | number | `10` | 单文件上传大小上限 |

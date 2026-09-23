@@ -46,7 +46,7 @@
 | 术语 (Term) | 英文标识 | 描述与业务规则 |
 | :--- | :--- | :--- |
 | **供应商 (Provider)** | `LlmProvider` | OpenAI 兼容协议（`baseURL + apiKey + model`）接入的模型服务方。接口统一为 `streamChat(req, signal): AsyncIterable<UpstreamChunk>`，API Key 仅存服务端环境变量。 |
-| **模型目录 (Model Catalog)** | `ModelCatalog` | 静态配置（`AI_PROVIDERS_JSON`）中可切换的模型清单，经 `GET /ai/models` 暴露给前端，响应不含 Key。 |
+| **模型目录 (Model Catalog)** | `ModelCatalog` | 静态配置（`config/ai-providers.json`，可被 `AI_PROVIDERS_JSON` 内联覆盖）中可切换的模型清单，经 `GET /ai/models` 暴露给前端，响应不含 Key。 |
 | **上游块 (Upstream Chunk)** | `UpstreamChunk` | 供应商 SSE 流经归一化后的最小单位：`{delta?, usage?, finishReason?}`。思维链字段不透传。 |
 | **流式管道 (Stream Pipeline)** | `StreamPipeline` | 上游块 → 可注册 transform 链（`pipeline.use(stage)`）→ SSE 事件的服务端加工管道。内置 `accumulate` / `usageExtract` / `sseEncode` 三段，是"自定义流式处理"的扩展点。 |
 | **AI 会话 (Conversation)** | `Conversation` | 用户与模型的一组多轮问答，归属单一用户。可在首次提问时隐式创建，标题取首条内容前 20 字。 |

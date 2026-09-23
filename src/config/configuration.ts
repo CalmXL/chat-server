@@ -1,3 +1,17 @@
+import { resolveAiProviders } from './ai-providers.loader.js';
+
+const defaultProviders = [
+  {
+    id: 'test-provider',
+    baseURL: 'https://api.openai.com/v1',
+    apiKey: 'sk-test-key-12345678',
+    models: [
+      { id: 'gpt-4o', label: 'GPT-4o' },
+      { id: 'deepseek-chat', label: 'DeepSeek Chat' },
+    ],
+  },
+];
+
 export default () => ({
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3000', 10),
@@ -26,26 +40,7 @@ export default () => ({
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
   ai: {
-    providers: (() => {
-      if (process.env.AI_PROVIDERS_JSON) {
-        try {
-          return JSON.parse(process.env.AI_PROVIDERS_JSON);
-        } catch {
-          return [];
-        }
-      }
-      return [
-        {
-          id: 'test-provider',
-          baseURL: 'https://api.openai.com/v1',
-          apiKey: 'sk-test-key-12345678',
-          models: [
-            { id: 'gpt-4o', label: 'GPT-4o' },
-            { id: 'deepseek-chat', label: 'DeepSeek Chat' },
-          ],
-        },
-      ];
-    })(),
+    providers: resolveAiProviders(process.env) ?? defaultProviders,
     maxConcurrentStreams: parseInt(
       process.env.AI_MAX_CONCURRENT_STREAMS || '3',
       10,
